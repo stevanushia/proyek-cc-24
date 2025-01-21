@@ -4,7 +4,7 @@
 
 <div class="container mt-4">
     <h2>Dashboard</h2>
-    <p>Welcome, {{ session('user')->name }}</p>
+    <p>Welcome, {{ session('user.name') }}</p>
     <div class="text-end mb-3">
         <a href="{{ route('addView') }}"><button class="btn btn-primary">Add File</button></a>
     </div>
