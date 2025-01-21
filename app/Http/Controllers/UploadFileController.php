@@ -45,7 +45,7 @@ class UploadFileController extends Controller
                 'filename' => $request->input('fileName'),
                 'filepath' => $filePath,
                 'filetype' => $fileType,
-                'owner' => session('user')->id, // Assuming the user ID is stored in the session
+                'owner' => session('user.id'), // Assuming the user ID is stored in the session
             ]);
 
             return redirect()->back()->with('success', 'File uploaded successfully.');
