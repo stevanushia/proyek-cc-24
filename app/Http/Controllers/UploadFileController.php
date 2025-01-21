@@ -13,11 +13,7 @@ class UploadFileController extends Controller
      */
     public function index()
     {
-        /* CARA 2 */
-        $pictures = File::files('storage/pictures');
-
-        // dd($pictures);
-        return view('add-file', compact('pictures'));
+        return view('add-file');
     }
 
     /**
