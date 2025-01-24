@@ -1,0 +1,39 @@
+name: Deploy Laravel to Cloud Run
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy Laravel App
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v1
+      with:
+        credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+
+    - name: Set up Google Cloud CLI
+      uses: google-github-actions/setup-gcloud@v1
+      with:
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
+        service_account_key: ${{ secrets.GCP_CREDENTIALS }}
+
+    - name: Build and push Docker image
+      run: |
+        gcloud builds submit \
+          --tag gcr.io/${{ secrets.GCP_PROJECT_ID }}/laravel-app
+
+    - name: Deploy to Cloud Run
+      run: |
+        gcloud run deploy laravel-app \
+          --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/laravel-app \
+          --platform managed \
+          --region us-central1 \
+          --allow-unauthenticated
