@@ -1,16 +1,26 @@
-FROM composer:1.9.0 AS build
+# Build stage
+FROM composer:2 as build
 WORKDIR /app
-COPY . /app
-RUN composer global require hirak/prestissimo && composer install
+COPY . .
+RUN composer install --no-dev --optimize-autoloader
 
-FROM php:7.3-apache-stretch
-RUN docker-php-ext-install pdo pdo_mysql
+# Production stage
+FROM php:8.1-apache
+WORKDIR /var/www/html
 
-EXPOSE 8080
-COPY --from=build /app /var/www/
-COPY docker/000-default.conf /etc/apache2/sites-available/000-default.conf
-COPY .env.example /var/www/.env
-RUN chmod 777 -R /var/www/storage/ && \
-    echo "Listen 8080" >> /etc/apache2/ports.conf && \
-    chown -R www-data:www-data /var/www/ && \
+# Install PHP extensions
+RUN apt-get update && apt-get install -y \
+    libpng-dev libjpeg-dev libfreetype6-dev zip unzip && \
+    docker-php-ext-install pdo_mysql gd && \
     a2enmod rewrite
+
+# Copy app files
+COPY --from=build /app /var/www/html
+COPY .env.example /var/www/html/.env
+
+# Set permissions
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+RUN chmod -R 777 /var/www/html/storage /var/www/html/bootstrap/cache
+
+# Expose port
+EXPOSE 8080
