@@ -1,0 +1,40 @@
+name: Deploy to Cloud Run
+
+on:
+  push:
+    branches:
+      - main  # Trigger deployment on push to the main branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Google Cloud SDK
+      uses: google-github-actions/setup-gcloud@v1
+      with:
+        version: '426.0.0'
+        service_account_key: ${{ secrets.GCP_CREDENTIALS }}
+        project_id: ${{ secrets.GCP_PROJECT_ID }} 
+
+    - name: Authenticate Docker with GCR
+      run: |
+        gcloud auth configure-docker
+
+    - name: Build and push Docker image
+      run: |
+        IMAGE=gcr.io/${{ secrets.GCP_PROJECT_ID }}/laravel-app:$GITHUB_SHA
+        docker build -t $IMAGE .
+        docker push $IMAGE
+
+    - name: Deploy to Cloud Run
+      run: |
+        IMAGE=gcr.io/${{ secrets.GCP_PROJECT_ID }}/laravel-app:$GITHUB_SHA
+        gcloud run deploy laravel-app \
+          --image $IMAGE \
+          --platform managed \
+          --region asia-southeast2 \ # Replace with your region, e.g., us-central1
+          --allow-unauthenticated
