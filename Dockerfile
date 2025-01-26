@@ -19,6 +19,8 @@ RUN apt-get update && apt-get install -y \
     docker-php-ext-install pdo pdo_mysql && \
     docker-php-ext-enable opcache
 
+RUN docker-php-ext-install pdo pdo_mysql
+
 # Set the Apache port
 EXPOSE 8080
 
