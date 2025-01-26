@@ -7,6 +7,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ShareController;
 use App\Http\Controllers\UploadController;
 use App\Http\Controllers\UploadFileController;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
 // TUTOR
@@ -60,4 +61,8 @@ Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 // LOGOUT LOGIC
 
 
-
+// force migrate
+Route::get('/migrate', function () {
+    Artisan::call('migrate', ['--force' => true]);
+    return 'Migrations executed successfully!';
+});
